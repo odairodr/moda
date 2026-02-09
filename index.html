@@ -1,0 +1,487 @@
+﻿import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+
+export default function App() {
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Mock product data
+  const products = [
+    {
+      id: 1,
+      name: 'Vestido Floral Verão',
+      price: 129.90,
+      category: 'women',
+      image: 'https://placehold.co/300x400/5e35b1/white?text=Vestido+Floral',
+      description: 'Vestido leve com estampa floral, perfeito para dias quentes.'
+    },
+    {
+      id: 2,
+      name: 'Camisa Social Slim',
+      price: 89.90,
+      category: 'men',
+      image: 'https://placehold.co/300x400/2e7d32/white?text=Camisa+Social',
+      description: 'Camisa social com corte moderno e tecido respirável.'
+    },
+    {
+      id: 3,
+      name: 'Conjunto Infantil',
+      price: 69.90,
+      category: 'kids',
+      image: 'https://placehold.co/300x400/e91e63/white?text=Conjunto+Kids',
+      description: 'Conjunto confortável com estampa divertida para crianças.'
+    },
+    {
+      id: 4,
+      name: 'Jaqueta de Couro',
+      price: 249.90,
+      category: 'women',
+      image: 'https://placehold.co/300x400/37474f/white?text=Jaqueta+Couro',
+      description: 'Jaqueta de couro sintético com forro térmico.'
+    },
+    {
+      id: 5,
+      name: 'Calça Jeans Skinny',
+      price: 119.90,
+      category: 'men',
+      image: 'https://placehold.co/300x400/0d47a1/white?text=Calça+Jeans',
+      description: 'Calça jeans com elastano para maior conforto e modelagem perfeita.'
+    },
+    {
+      id: 6,
+      name: 'Mochila Estilosa',
+      price: 79.90,
+      category: 'accessories',
+      image: 'https://placehold.co/300x400/ff5722/white?text=Mochila',
+      description: 'Mochila versátil com compartimentos organizadores e design moderno.'
+    },
+    {
+      id: 7,
+      name: 'Vestido de Festa',
+      price: 189.90,
+      category: 'women',
+      image: 'https://placehold.co/300x400/7b1fa2/white?text=Vestido+Festa',
+      description: 'Vestido elegante com detalhes em renda para ocasiões especiais.'
+    },
+    {
+      id: 8,
+      name: 'Tênis Casual',
+      price: 159.90,
+      category: 'accessories',
+      image: 'https://placehold.co/300x400/424242/white?text=Tênis+Casual',
+      description: 'Tênis confortável com solado antiderrapante e design contemporâneo.'
+    }
+  ];
+
+  const categories = [
+    { id: 'all', name: 'Todos', emoji: '✨' },
+    { id: 'women', name: 'Feminino', emoji: '👗' },
+    { id: 'men', name: 'Masculino', emoji: '👔' },
+    { id: 'kids', name: 'Infantil', emoji: '🧸' },
+    { id: 'accessories', name: 'Acessórios', emoji: '👜' }
+  ];
+
+  const addToCart = (product) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map(item => 
+          item.id === product.id 
+            ? {...item, quantity: item.quantity + 1} 
+            : item
+        );
+      }
+      return [...prevCart, {...product, quantity: 1}];
+    });
+    
+    // Show feedback animation
+    const feedbackElement = document.getElementById(`feedback-${product.id}`);
+    if (feedbackElement) {
+      feedbackElement.style.opacity = '1';
+      feedbackElement.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        feedbackElement.style.opacity = '0';
+        feedbackElement.style.transform = 'translateY(0)';
+      }, 1500);
+    }
+  };
+
+  const removeFromCart = (productId) => {
+    setCart(cart.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    setCart(cart.map(item => 
+      item.id === productId 
+        ? {...item, quantity: newQuantity} 
+        : item
+    ));
+  };
+
+  const filteredProducts = selectedCategory === 'all' 
+    ? products 
+    : products.filter(product => product.category === selectedCategory);
+
+  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 font-sans">
+      {/* Header */}
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xl px-3 py-1 rounded-lg shadow-md">
+                MODA NAS <span className="text-yellow-300">EMPRESAS</span>
+              </div>
+              <nav className="hidden md:flex space-x-8 ml-10">
+                {categories.map(category => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`flex items-center font-medium text-sm transition-colors ${
+                      selectedCategory === category.id 
+                        ? 'text-purple-600 border-b-2 border-purple-600 pb-1' 
+                        : 'text-gray-700 hover:text-purple-600'
+                    }`}
+                  >
+                    <span className="mr-1">{category.emoji}</span>
+                    {category.name}
+                  </button>
+                ))}
+              </nav>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 text-gray-700 hover:text-purple-600 transition-colors"
+                aria-label="Carrinho de compras"
+              >
+                🛒
+                {cart.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                  </span>
+                )}
+              </button>
+              <button className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-full font-medium hover:opacity-90 transition-opacity hidden md:block">
+                Cadastre-se e Ganhe 15% OFF
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-r from-purple-700 to-pink-600 text-white py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-5xl font-bold mb-6"
+          >
+            Estilo que Transforma
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-xl md:text-2xl mb-8 opacity-90"
+          >
+            Descubra peças exclusivas para cada momento da sua vida
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <button className="bg-yellow-400 text-purple-900 font-bold text-lg px-8 py-3 rounded-full hover:bg-yellow-300 transition-colors shadow-lg">
+              Ver Coleções
+            </button>
+          </motion.div>
+        </div>
+        <div className="absolute -bottom-16 -right-20 w-64 h-64 bg-purple-500 rounded-full opacity-30 animate-blob"></div>
+        <div className="absolute -top-16 -left-20 w-80 h-80 bg-pink-500 rounded-full opacity-30 animate-blob animation-delay-2000"></div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Destaques da Temporada</h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-purple-600 to-pink-500 mx-auto rounded-full"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {filteredProducts.map((product) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow border border-gray-100"
+              >
+                <div className="relative overflow-hidden group">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-72 object-center transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                    <button 
+                      onClick={() => addToCart(product)}
+                      className="w-full bg-yellow-400 text-purple-900 font-bold py-2 rounded-full hover:bg-yellow-300 transition-colors"
+                    >
+                      Adicionar ao Carrinho
+                    </button>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h3>
+                  <p className="text-purple-600 font-bold text-xl mb-2">R$ {product.price.toFixed(2)}</p>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                  <div 
+                    id={`feedback-${product.id}`} 
+                    className="absolute -bottom-10 left-0 right-0 text-center text-green-500 font-medium opacity-0 transition-all"
+                  >
+                    ✅ Adicionado ao carrinho!
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">Nenhum produto encontrado nesta categoria</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Promotion Banner */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-amber-50 to-orange-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Frete Grátis em Todas as Compras</h2>
+          <p className="text-gray-700 text-lg mb-6">Compre acima de R$ 199,00 e receba seu pedido onde estiver</p>
+          <button className="bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold px-8 py-3 rounded-full text-lg hover:opacity-90 transition-opacity shadow-lg">
+            Ver Todas as Ofertas
+          </button>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">O Que Nossos Clientes Dizem</h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-purple-600 to-pink-500 mx-auto rounded-full"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { name: "Ana Silva", text: "Amo as peças da Moda Nas Empresas! O caimento é perfeito e o tecido de ótima qualidade. Já estou na terceira compra!", rating: 5 },
+              { name: "Carlos Mendes", text: "Recebi minha camisa antes do prazo e a embalagem era linda. A troca foi super fácil quando precisei trocar o tamanho.", rating: 5 },
+              { name: "Juliana Costa", text: "Os vestidos são maravilhosos! Usei o vestido floral em uma festa e recebi muitos elogios. Com certeza voltarei a comprar.", rating: 5 }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
+              >
+                <div className="flex text-yellow-400 mb-3">
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                    <span key={i}>★</span>
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-4">"{testimonial.text}"</p>
+                <div className="font-bold text-purple-700">- {testimonial.name}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-700 to-pink-600 text-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Fique por Dentro das Novidades</h2>
+          <p className="text-purple-100 text-lg mb-6">Cadastre seu e-mail e receba em primeira mão nossas promoções exclusivas</p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Seu e-mail aqui" 
+              className="px-4 py-3 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+            <button className="bg-yellow-400 text-purple-900 font-bold px-6 py-3 rounded-full hover:bg-yellow-300 transition-colors whitespace-nowrap">
+              Quero Receber!
+            </button>
+          </div>
+          <p className="text-purple-200 text-sm mt-3">Prometemos não enviar spam. Você pode cancelar a inscrição a qualquer momento.</p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <div className="font-bold text-xl text-white mb-4">MODA NAS <span className="text-yellow-400">EMPRESAS</span></div>
+            <p className="mb-4">Sua loja online de roupas com estilo, qualidade e conforto para todas as ocasiões.</p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">📱</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">💬</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">📧</a>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-white font-bold mb-4 text-lg">Links Úteis</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="hover:text-white transition-colors">Início</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Produtos</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Ofertas</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Sobre Nós</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-white font-bold mb-4 text-lg">Categorias</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="hover:text-white transition-colors flex items-center"><span className="mr-2">👗</span> Feminino</a></li>
+              <li><a href="#" className="hover:text-white transition-colors flex items-center"><span className="mr-2">👔</span> Masculino</a></li>
+              <li><a href="#" className="hover:text-white transition-colors flex items-center"><span className="mr-2">🧸</span> Infantil</a></li>
+              <li><a href="#" className="hover:text-white transition-colors flex items-center"><span className="mr-2">👜</span> Acessórios</a></li>
+              <li><a href="#" className="hover:text-white transition-colors flex items-center"><span className="mr-2">👟</span> Calçados</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-white font-bold mb-4 text-lg">Contato</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <span className="mr-2 mt-1">📍</span>
+                <span>Nova Alvorada do Sul</span>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">📱</span>
+                <span>(67) 98765-4321</span>
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✉️</span>
+                <span>@nas.empresas</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
+          <p>© 2026 Moda Nas Empresas. Todos os direitos reservados. | Desenvolvido com ❤️ para amantes de moda</p>
+        </div>
+      </footer>
+
+      {/* Cart Sidebar */}
+      {isCartOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/50 z-50"
+          onClick={() => setIsCartOpen(false)}
+        >
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Seu Carrinho</h2>
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+                aria-label="Fechar carrinho"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {cart.length === 0 ? (
+              <div className="p-8 text-center">
+                <div className="text-5xl mb-4">🛒</div>
+                <p className="text-gray-600 text-lg">Seu carrinho está vazio</p>
+                <button 
+                  onClick={() => setIsCartOpen(false)}
+                  className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors"
+                >
+                  Continuar Comprando
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="p-4 max-h-[calc(100vh-140px)] overflow-y-auto">
+                  {cart.map(item => (
+                    <div key={item.id} className="flex items-center border-b border-gray-100 py-4 last:border-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-lg"
+                      />
+                      <div className="ml-4 flex-1">
+                        <h3 className="font-bold text-gray-900">{item.name}</h3>
+                        <p className="text-purple-600 font-bold">R$ {item.price.toFixed(2)}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                        >
+                          -
+                        </button>
+                        <span className="w-6 text-center">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                        >
+                          +
+                        </button>
+                        <button 
+                          onClick={() => removeFromCart(item.id)}
+                          className="ml-2 text-gray-400 hover:text-red-500"
+                          aria-label="Remover item"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex justify-between text-lg font-bold mb-4">
+                    <span>Total:</span>
+                    <span className="text-purple-600">R$ {cartTotal.toFixed(2)}</span>
+                  </div>
+                  <button className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 rounded-full font-bold text-lg hover:opacity-90 transition-opacity shadow-md">
+                    Finalizar Compra
+                  </button>
+                  <p className="text-center text-gray-500 text-sm mt-3">
+                    Frete grátis para compras acima de R$ 199,00
+                  </p>
+                </div>
+              </>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
